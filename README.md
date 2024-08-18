@@ -1,6 +1,6 @@
-# My GraphQL Package
+# @bvvvp009/hyperstatus
 
-This package allows you to query status of hyperlane messages with user-provided parameters.
+A package to query the status of Hyperlane messages with user-provided parameters.
 
 ## Installation
 
@@ -9,64 +9,107 @@ npm install @bvvvp009/hyperstatus
 
 ```
 
-## Usage 
+# Usage 
 
-```javascript
+## Example 1: Normal Use
+
+
+### QueryGraphQL
+
+``` typescript
 
 import { queryGraphQL } from '@bvvvp009/hyperstatus';
 
-
-const POLLING_INTERVAL_MS = 5000; // Polling interval in milliseconds
-const TIMEOUT_MS = 300000; // Timeout after 5 minutes
-
-const checkDeliveryStatus = async (params) => {
-  let timeoutId;
-
-  const poll = async () => {
-    try {
-      const result = await queryGraphQL(params);
-    
-      if (result && result.length > 0 && result[0].is_delivered) {
-        
-        clearInterval(pollingId);
-        clearTimeout(timeoutId);
-        console.log('Message delivered:', result);
-      } else {
-        console.log ('Message not delivered yet, polling again...');
-      }
-    } catch (error) {
-      console.error('Error during polling:', error);
-      clearInterval(pollingId);
-      clearTimeout(timeoutId);
-      console.log ('Error during polling:', error)
-    }
-  };
-
-  const pollingId = setInterval(poll, POLLING_INTERVAL_MS);
-
-  timeoutId = setTimeout(() => {
-    console.error('Polling timed out.');
-    clearInterval(pollingId);
-  }, TIMEOUT_MS);
+const fetchMessages = async () => {
+  const params = { search: '0x1234...' };
+  const messages = await queryGraphQL(params);
+  console.log(messages);
 };
 
-// Example usage
-export async function checkStatus(hash_id){
-  const params = {
-    search: hash_id
-  };
-  await checkDeliveryStatus(params);
-}
-
-//Example Import checkDeliveryStatus() accepted parameters originchain Tx Hash, Message ID, destination Tx Hash
-
-checkStatus("0x533e82d9c9748f505173694aade070b3a2128c3984db9be590ed7a2b4967188a") 
+fetchMessages();
 
 ```
 
-### Build and publish the package
+### startPolling
 
-1. **Build the package**: Run `npm run build` to compile the TypeScript code.
-2. **Publish the package**: Run `npm publish` to publish your package to npm.
+```typescript
 
-With this setup, users can import your package, pass their own parameters, and use the provided functionality.
+import { startPolling } from '@bvvvp009/hyperstatus';
+
+const pendingMessageIds = ['0x123...', '0x456...']; //tx hash from the 
+
+const handleMessages = (messages) => {
+  messages.forEach(message => {
+    console.log(`Message ${message.id} status: ${message.status}`);
+  });
+};
+
+// Start polling every 60 seconds
+startPolling(pendingMessageIds, 60000, handleMessages);
+
+```
+
+## Example 2: With React and React-Toastify
+
+``` typescript
+
+import React, { useState, useEffect } from 'react';
+import { queryGraphQL, startPolling } from '@bvvvp009/hyperstatus';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
+
+function App() {
+
+
+queryGraphQL({ search:'0xbf28e675bcc8fd109cb4162d1581c27d171bae36d762635a6e5dc8533b232d89' }).then(initialResults => {
+// setresult(initialResults)
+  // Start polling for pending messages
+  console.log('initials results',initialResults)
+  const pendingMessageIds = initialResults
+    .filter(msg => msg.status === 'Pending' && !msg.isNonEVM)
+    .map(msg => msg.id);
+console.log("pending",pendingMessageIds)
+  startPolling(pendingMessageIds,40000, (updatedMessages) => {
+    console.log('Updated messages:', updatedMessages);
+    // Handle updated messages (e.g., update UI, show notifications, etc.)
+
+    const Msg = ({ closeToast, toastProps }) => (
+      <div>
+       <div>Message status {updatedMessages[0]?.status}</div> 
+       <div>From:{updatedMessages[0]?.from || 'Unknown Chain'}</div>
+       <div>To:{updatedMessages[0]?.to || 'Unknown Chain'}</div>
+        
+      </div>
+    );
+  toast(<Msg/>,{toastId:updatedMessages[0]?.details?.msg_id})
+   
+  });
+});
+
+
+  return (
+   <div>
+     
+   <ToastContainer limit={3}/>
+   </div>
+  );
+}
+
+export default App;
+
+```
+
+
+
+### API
+queryGraphQL(params: any): Promise<any[]>
+Queries the GraphQL API with the provided parameters and returns an array of message objects.
+
+checkPendingMessages(pendingMessageIds: string[]): Promise<any[]>
+Checks the status of the pending messages and returns an array of updated message objects.
+
+startPolling(pendingMessageIds: string[], interval: number, callback?: (messages: any[]) => void)
+Starts polling for the status of the pending messages at the specified interval and calls the callback function with the updated messages.
+

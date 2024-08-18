@@ -1,26 +1,27 @@
 {
   "name": "@bvvvp009/hyperstatus",
-  "version": "1.0.5",
+  "version": "1.1.2",
   "description": "A package to query status of hyperlane messages with user-provided parameters",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "npx tsc"
   },
   "dependencies": {
     "axios": "^0.21.1"
   },
   "devDependencies": {
-    "typescript": "^4.3.5",
-    "@types/node": "^14.14.41",
-    "@types/axios": "^0.14.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^4.9.5"
   },
   "keywords": [
     "Hyperlane",
     "message status",
     "Delivery",
     "Query"
-
+  ],
+  "files": [
+    "dist"
   ],
   "author": "HyperFill (https://hyperfill.fun)",
   "license": "ISC",
