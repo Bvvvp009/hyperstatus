@@ -154,6 +154,7 @@ const chainNames = {
     "111188": "re.al",
     "690": "Redstone",
     "1996": "Sanko",
+    "745": "Stride",
     "534352": "Scroll",
     "1329": "Sei",
     "167000": "Taiko",
@@ -169,22 +170,90 @@ const chainNames = {
     "421614": "Arbitrum Sepolia",
     "84532": "Base Sepolia",
     "97": "BSC Testnet",
-    "10200": "Chiado",
-    "6398": "Connext Sepolia",
     "471923": "Eco Testnet",
-    "239092742": "Eclipse Testnet",
     "43113": "Fuji",
     "11155420": "Optimism Sepolia",
     "161221135": "Plume Testnet",
     "80002": "Polygon Amoy",
-    "88002": "Proteus Testnet",
     "534351": "Scroll Sepolia",
     "11155111": "Sepolia",
-    "1399811151": "Solana Devnet",
-    "1399811150": "Solana Testnet",
-    "98985": "Superposition Testnet"
+    "98985": "Superposition Testnet",
+    "41455": "Aleph Zero EVM",
+    "33139": "ApeChain",
+    "466": "AppChain",
+    "42170": "Arbitrum Nova",
+    "10242": "Arthera",
+    "592": "Astar",
+    "3776": "Astar zkEVM",
+    "1313161554": "Aurora",
+    "8333": "B3",
+    "200901": "Bitlayer",
+    "288": "Boba Mainnet",
+    "223": "B² Network",
+    "1000088888": "Chiliz",
+    "1030": "Conflux eSpace",
+    "668668": "Conwai",
+    "1116": "Core",
+    "21000000": "Corn",
+    "666666666": "Degen",
+    "2000": "Dogechain",
+    "5545": "DuckChain",
+    "1408864445": "Eclipse",
+    "25327": "Everclear",
+    "9001": "Evmos EVM",
+    "250": "Fantom Opera",
+    "253368190": "Flame",
+    "14": "Flare",
+    "1000000747": "EVM on Flow",
+    "478": "Form",
+    "1666600000": "Harmony One",
+    "1000013371": "Immutable zkEVM",
+    "57073": "Ink",
+    "8217": "Kaia",
+    "1000073017": "Lumia Prism",
+    "1000001750": "Metal L2",
+    "34443": "Mode",
+    "360": "Molten",
+    "2818": "Morph",
+    "970": "Oort",
+    "291": "Orderly L2",
+    "1000008008": "Polynomial",
+    "227": "Prom",
+    "1000012617": "RARI Chain",
+    "753": "Rivalz",
+    "1000000030": "Rootstock",
+    "109": "Shibarium",
+    "2192": "SnaxChain",
+    "1399811149": "Solana",
+    "146": "Sonic",
+    "1000055244": "Superposition",
+    "5330": "Superseed",
+    "1923": "Swell",
+    "40": "Telos EVM",
+    "61166": "Treasure",
+    "130": "Unichain",
+    "1480": "Vana",
+    "543210": "Zero Network",
+    "810180": "zkLink Nova",
+    "324": "zkSync",
+    "11124": "Abstract Testnet",
+    "2039": "Aleph Zero EVM Testnet",
+    "1098411886": "Arcadia Testnet v2",
+    "80084": "Berachain bArtio",
+    "325000": "Camp Network Testnet V2",
+    "5115": "Citrea Testnet",
+    "132902": "Form Testnet",
+    "17000": "Holesky",
+    "998": "Hyperliquid EVM Testnet",
+    "763373": "Ink Sepolia",
+    "911867": "Odyssey Testnet",
+    "1946": "Soneium Minato Testnet",
+    "64165": "Sonic Testnet",
+    "33626250": "SUAVE Toliman Testnet",
+    "3799": "Tangle Testnet",
+    "978658": "Treasure Topaz Testnet",
+    "1301": "Unichain Testnet"
 };
-const nonEVMChains = [1853125230, 6909546];
 const processMessage = (message) => {
     const chainName = chainNames[message.destination_domain_id] || 'Unknown Chain';
     const fromChainId = chainNames[message.origin_chain_id] || 'Unknown Chain';
@@ -194,7 +263,6 @@ const processMessage = (message) => {
         status,
         from: fromChainId,
         to: chainName,
-        isNonEVM: nonEVMChains.includes(message.destination_domain_id),
         details: message
     };
 };
@@ -248,10 +316,10 @@ const startPolling = (interval = 60000, callback) => {
         const updatedMessages = yield checkPendingMessages(pendingMessageIds);
         const remainingPendingIds = [];
         updatedMessages.forEach(msg => {
-            if (msg.status === 'Delivered' || msg.isNonEVM) {
+            if (msg.status === 'Delivered') {
                 removePendingMessageId(msg.id);
             }
-            else if (msg.status === 'Pending' && !msg.isNonEVM) {
+            else if (msg.status === 'Pending') {
                 remainingPendingIds.push(msg.id);
             }
         });

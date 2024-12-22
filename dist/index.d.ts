@@ -3,7 +3,6 @@ declare const queryGraphQL: (params: any) => Promise<{
     status: string;
     from: string;
     to: string;
-    isNonEVM: boolean;
     details: any;
 }[]>;
 declare const checkPendingMessages: (pendingMessageIds: string[]) => Promise<{
@@ -11,7 +10,6 @@ declare const checkPendingMessages: (pendingMessageIds: string[]) => Promise<{
     status: string;
     from: string;
     to: string;
-    isNonEVM: boolean;
     details: any;
 }[]>;
 declare const startPolling: (interval?: number, callback?: ((messages: any[]) => void) | undefined) => void;
